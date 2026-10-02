@@ -70,6 +70,23 @@ section{padding-block:clamp(64px,9vw,104px)}
 .btn-line{border-color:var(--line);color:var(--ink);background:var(--card)}
 .top .btn{padding:10px 16px;font-size:14px}
 @media (max-width:900px){.nav{display:none}.top .wrap{gap:12px}.top .btn{display:none}.lang{margin-left:auto}}
+.menu-btn{all:unset;box-sizing:border-box;display:none;width:42px;height:42px;border-radius:999px;border:1px solid rgba(255,255,255,.22);cursor:pointer;place-items:center;flex:none;color:var(--on-stage)}
+.menu-btn:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+.menu-btn .bars{position:relative;display:block;width:16px;height:2px;background:currentColor;border-radius:2px;transition:background .15s}
+.menu-btn .bars::before,.menu-btn .bars::after{content:"";position:absolute;left:0;width:16px;height:2px;background:currentColor;border-radius:2px;transition:transform .2s ease}
+.menu-btn .bars::before{top:-5px}
+.menu-btn .bars::after{top:5px}
+.menu-btn[aria-expanded="true"] .bars{background:transparent}
+.menu-btn[aria-expanded="true"] .bars::before{transform:translateY(5px) rotate(45deg)}
+.menu-btn[aria-expanded="true"] .bars::after{transform:translateY(-5px) rotate(-45deg)}
+.mnav{background:var(--stage);border-top:1px solid rgba(255,255,255,.08);box-shadow:0 24px 40px -24px rgba(0,0,0,.6)}
+.mnav .wrap{display:grid;padding-block:6px 20px}
+.mnav a{text-decoration:none;color:var(--on-stage);font-size:17px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+.mnav a.btn{display:flex;margin-top:16px;border-bottom:0;padding:15px 22px;color:#14231A}
+section{scroll-margin-top:72px}
+@media (max-width:900px){.menu-btn{display:grid}}
+@media (min-width:901px){.mnav{display:none!important}}
+@media (max-width:420px){.brand{font-size:18px;gap:8px}.brand svg{width:26px;height:26px}.lang button{padding:5px 9px}.top .wrap{gap:8px}}
 
 /* Hero / stage */
 .stage{position:relative;overflow:hidden;background:var(--stage);color:var(--on-stage);padding-block:clamp(56px,8vw,96px) clamp(64px,9vw,110px)}
@@ -230,8 +247,19 @@ input:focus,select:focus,textarea:focus{outline:2px solid #D9AE62;outline-offset
       <button type="button" id="lang-en" aria-pressed="true">EN</button>
       <button type="button" id="lang-es" aria-pressed="false">ES</button>
     </div>
+    <button type="button" class="menu-btn" id="menu-btn" aria-expanded="false" aria-controls="mnav" aria-label="Menu"><span class="bars"></span></button>
     <a class="btn btn-brass" href="#contact"><span class="en">Get started</span><span class="es">Empezar</span></a>
   </div>
+  <nav class="mnav" id="mnav" aria-label="Mobile" hidden>
+    <div class="wrap">
+      <a href="#services"><span class="en">Services</span><span class="es">Servicios</span></a>
+      <a href="#how"><span class="en">How it works</span><span class="es">Cómo funciona</span></a>
+      <a href="#pricing"><span class="en">Pricing</span><span class="es">Precios</span></a>
+      <a href="#taxes"><span class="en">Key dates</span><span class="es">Fechas clave</span></a>
+      <a href="#faq">FAQ</a>
+      <a class="btn btn-brass" href="#contact"><span class="en">Book a free consultation</span><span class="es">Agenda una consulta gratis</span></a>
+    </div>
+  </nav>
 </header>
 
 <main id="top">
@@ -565,6 +593,18 @@ input:focus,select:focus,textarea:focus{outline:2px solid #D9AE62;outline-offset
   document.querySelectorAll('[data-plan]').forEach(function(a){
     a.addEventListener('click',function(){ var s=document.getElementById('f-plan'); s.value=a.dataset.plan; });
   });
+
+  var mb=document.getElementById('menu-btn'), mn=document.getElementById('mnav');
+  function setMenu(o){
+    var es=body.classList.contains('es');
+    mn.hidden=!o; mb.setAttribute('aria-expanded',String(o));
+    mb.setAttribute('aria-label', o?(es?'Cerrar menú':'Close menu'):(es?'Menú':'Menu'));
+  }
+  mb.addEventListener('click',function(){ setMenu(mn.hidden); });
+  mn.addEventListener('click',function(e){ if(e.target.closest('a')) setMenu(false); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&!mn.hidden){ setMenu(false); mb.focus(); } });
+  document.addEventListener('click',function(e){ if(!mn.hidden&&!e.target.closest('.top')) setMenu(false); });
+  window.addEventListener('resize',function(){ if(window.innerWidth>900&&!mn.hidden) setMenu(false); });
 
   var addr=document.getElementById('email-addr').textContent.trim();
   document.getElementById('copy-email').addEventListener('click',function(e){
